@@ -2,78 +2,78 @@
 # Financial Frictions and the Wealth Distribution
 
 
-###########################################################
-# Model parameters
-###########################################################
+# ###########################################################
+# # Model parameters
+# ###########################################################
 
-alpha         = 0.35;                       # Capital share   
-delta         = 0.1;                        # Depreciation
-gamma         = 2;                          # CRRA utility with parameter s
-rho           = 0.05;                       # discount rate
-Zmean         = 0.00;                       # mean for TFP
-theta         = 0.50;                       # AR for TFP
-sigma         = 0.01;                       # sigma for TFP
-la1           = 0.5;                        # transition prob
-la2           = 1/3;
-la            = [la1,la2];                  # vector of transition prob
-z1            = 0.93;                       # labor productivity
-z2            = 1+ la2/la1 *(1- z1);
-amin          = 0;                          # borrowing constraint
-amax          = 30;                         # max value of assets
-Kmin          = 3.5;                        # relevant range for aggregate K
-Kmax          = 3.9;
-Zmin          = -0.04;                      # relevant range for aggregate Z
-Zmax          =  0.04;
-                       
-nval_a        = 1001;                       # number of points between amin and amax, please make it end in 1
-nval_z        = 2;                          # number of options for z (the idiosincratic shock)
-nval_K        = 4;                          # number of points between Kmin and Kmax
-nmul_K        = 5;                          # number of interpolated points to add between every contiguous pair of K values
-nval_KK       = (nval_K-1)*nmul_K+1;        # number of points between Kmin and Kmax, in the interpolated version of A
-nval_Z        = 41;                         # number of points between Zmin and Zmax, please make it end in 1
-nval_Zsim     = 12000;                      # number of periods in simulation
-delay_Zsim    = 1200;                       # number of initial periods in simulation that will not be used
+# const alpha         = 0.35;                       # Capital share   
+# const delta         = 0.1;                        # Depreciation
+# const gamma         = 2;                          # CRRA utility with parameter s
+# const rho           = 0.05;                       # discount rate
+# const Zmean         = 0.00;                       # mean for TFP
+# const theta         = 0.50;                       # AR for TFP
+# const sigma         = 0.01;                       # sigma for TFP
+# const la1           = 0.5;                        # transition prob
+# const la2           = 1/3;
+# const la            = [la1,la2];                  # vector of transition prob
+# const z1            = 0.93;                       # labor productivity
+# const z2            = 1+ la2/la1 *(1- z1);
+# const amin          = 0;                          # borrowing constraint
+# const amax          = 30;                         # max value of assets
+# const Kmin          = 3.5;                        # relevant range for aggregate K
+# const Kmax          = 3.9;
+# const Zmin          = -0.04;                      # relevant range for aggregate Z
+# const Zmax          =  0.04;
+      
+# const nval_a        = 1001;                       # number of points between amin and amax, please make it end in 1
+# const nval_z        = 2;                          # number of options for z (the idiosincratic shock)
+# const nval_K        = 4;                          # number of points between Kmin and Kmax
+# const nmul_K        = 5;                          # number of interpolated points to add between every contiguous pair of K values
+# const nval_KK       = (nval_K-1)*nmul_K+1;        # number of points between Kmin and Kmax, in the interpolated version of A
+# const nval_Z        = 41;                         # number of points between Zmin and Zmax, please make it end in 1
+# const nval_Zsim     = 12000;                      # number of periods in simulation
+# const delay_Zsim    = 1200;                       # number of initial periods in simulation that will not be used
 
-dt       = 1/12;                            # size of t jump
-da  = (amax-amin)/(nval_a-1);               # size of a jump
-dK  = (Kmax-Kmin)/(nval_K-1);               # size of K jump
-dKK = (Kmax-Kmin)/(nval_KK-1);              # size of K jump after interpolation in K
-dZ  = (Zmax-Zmin)/(nval_Z-1);               # size of Z jump
+# const dt       = 1/12;                            # size of t jump
+# const da  = (amax-amin)/(nval_a-1);               # size of a jump
+# const dK  = (Kmax-Kmin)/(nval_K-1);               # size of K jump
+# const dKK = (Kmax-Kmin)/(nval_KK-1);              # size of K jump after interpolation in K
+# const dZ  = (Zmax-Zmin)/(nval_Z-1);               # size of Z jump
 
 
 ###########################################################
 # parameters for the algorithm
 ###########################################################
 
-multi_sim    =   4    ;                     # number of simulation starts (i.e. one plus number of times we stop the simulation and start again from the ss)
-delay_sim    =  500/dt;                     # number of initial periods in each simulation that will not be used (pre-heat)
-used_sim     = 5000/dt;                     # number of periods in each simulation that will actually be used
-each_sim     = delay_sim+used_sim;          # number of periods on each simulation
-nval_sim     = multi_sim*each_sim;          # total number of periods in all simulations
-rngseed1     = 123;                         # RNG seed for calculating the shocks for the simulation
+const multi_sim    =   4    ;                     # number of simulation starts (i.e. one plus number of times we stop the simulation and start again from the ss)
+const delay_sim    =  500/dt;                     # number of initial periods in each simulation that will not be used (pre-heat)
+const used_sim     = 5000/dt;                     # number of periods in each simulation that will actually be used
+const each_sim     = delay_sim+used_sim;          # number of periods on each simulation
+const nval_sim     = multi_sim*each_sim;          # total number of periods in all simulations
+const rngseed1     = 123;                         # RNG seed for calculating the shocks for the simulation
                                             # there used to be a second seed for the mini-batch selection in the NN training, but we got rid of that by moving to batch gradient descent
 
-maxitHJB = 100;                             # max number of iterations for the HJB
-critHJB  = 10^(-6);                         # convergence crit for the HJB 
-weHJB    = 0.5;                             # relaxation algorithm for HJB
-Delta    = 1000;                            # Delta in HJB
-maxitPLM = 200;                             # max number of iterations of the full algorithm
-critPLM  = 0.00050;                         # convergence crit for determining that the PLM has converged
-wePLM    = 0.3;                             # Initial weigth in the relaxation algorithm for PLM convergence
-wePLM1   = 0.9;                             # reduction of the relaxation algorithm: wePLM = wePLM*wePLM1+wePLM2
-wePLM2   = 0.005;                           # reduction of the relaxation algorithm
+const maxitHJB = 100;                             # max number of iterations for the HJB
+const critHJB  = 10^(-6);                         # convergence crit for the HJB 
+const weHJB    = 0.5;                             # relaxation algorithm for HJB
+const Delta    = 1000;                            # Delta in HJB
+const maxitPLM = 200;                             # max number of iterations of the full algorithm
+const critPLM  = 0.00050;                         # convergence crit for determining that the PLM has converged
+const wePLM    = 0.3;                             # Initial weigth in the relaxation algorithm for PLM convergence
+const wePLM1   = 0.9;                             # reduction of the relaxation algorithm: wePLM = wePLM*wePLM1+wePLM2
+const wePLM2   = 0.005;                           # reduction of the relaxation algorithm
 
 ###########################################################
 # Neural network parameters
 ###########################################################
-network_width  =    16;                     # Number of neurons in the hidden layer
-mynoise        =     1;                     # Size of random initial NN parameters
-lambda         =   0.1;                     # NN regularization parameter
-NN_iters       = 10000;                     # Number of iterations to train the network
-NN_starts      =    10;                     # Number of random restarts of the network training (only affects the first step, then it just starts from the previous NN)
-learning_speed =  0.01;                     # Only affects the first step, then this becomes adaptative
-reglimY        =     4;                     # NN input normalization
-reglimX        =     4;                     # NN input normalization
+const network_width  =    16;                     # Number of neurons in the hidden layer
+const mynoise        =     1;                     # Size of random initial NN parameters
+const lambda         =   0.1;                     # NN regularization parameter
+const NN_iters       = 10000;                     # Number of iterations to train the network
+const NN_starts      =    10;                     # Number of random restarts of the network training (only affects the first step, then it just starts from the previous NN)
+const learning_speed =  0.01;                     # Only affects the first step, then this becomes adaptative
+const reglimY        =     4;                     # NN input normalization
+const reglimX        =     4;                     # NN input normalization
 ###########################################################
 
 using JLD2
@@ -128,7 +128,7 @@ end
 a2 = a[:,:,1,1]; # this one is 2D instead of 4D, we need it for a simpler KFE algorithm
 
 # Interest rates and wages (4D matrices that don't depend on anything but parameters) - WE ARE ASSUMING L=1
-r =  alpha * K.^(alpha-1).*exp.(Z) .- delta;
-w = (1-alpha) * K.^alpha .*exp.(Z);
+r =  α * K.^(α-1).*exp.(Z) .- δ;
+w = (1-α) * K.^α .*exp.(Z);
 
 
